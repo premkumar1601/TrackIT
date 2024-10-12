@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
 from app.models import ClockIn, ClockInResponse, ClockInUpdate
 from app.crud import CRUDClockIn
+from pydantic_mongo import PydanticObjectId
 from typing import List, Optional
 import os
 
@@ -22,7 +23,7 @@ async def create_clock_in(clock_in: ClockIn, api_key: str = Depends(verify_api_k
     return {"inserted_id": inserted_id}
 
 @router.get("/id/{clock_in_id}", response_model=ClockInResponse, summary="Get Clock-In Entry by ID", description="Retrieve a clock-in entry by its ID.")
-async def get_clock_in(clock_in_id: str, api_key: str = Depends(verify_api_key)):
+async def get_clock_in(clock_in_id: PydanticObjectId, api_key: str = Depends(verify_api_key)):
     clock_in = clock_in_manager.get_by_id(clock_in_id)
     if not clock_in:
         raise HTTPException(status_code=404, detail="Clock-in entry not found")
@@ -37,7 +38,7 @@ async def filter_clock_ins(email: Optional[str] = None,
     return clock_ins
 
 @router.put("/id/{clock_in_id}", response_model=ClockInUpdate, summary="Update Clock-In Entry", description="Update an existing clock-in entry by its ID and return the updated entry.")
-async def update_clock_in(clock_in_id: str, updated_clock_in: ClockInUpdate, api_key: str = Depends(verify_api_key)):
+async def update_clock_in(clock_in_id: PydanticObjectId, updated_clock_in: ClockInUpdate, api_key: str = Depends(verify_api_key)):
     clock_in_data = updated_clock_in.model_dump(exclude_none=True)
     updated_entry = clock_in_manager.update(clock_in_id, clock_in_data)
     if not updated_entry:
@@ -45,7 +46,7 @@ async def update_clock_in(clock_in_id: str, updated_clock_in: ClockInUpdate, api
     return updated_entry
 
 @router.delete("/id/{clock_in_id}", response_model=dict, summary="Delete Clock-In Entry", description="Delete a clock-in entry by its ID.")
-async def delete_clock_in(clock_in_id: str, api_key: str = Depends(verify_api_key)):
+async def delete_clock_in(clock_in_id: PydanticObjectId, api_key: str = Depends(verify_api_key)):
     deleted = clock_in_manager.delete(clock_in_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Clock-in entry not found")

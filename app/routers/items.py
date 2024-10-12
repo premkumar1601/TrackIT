@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header, Depends
 from app.models import Item, ItemResponse, ItemUpdate
 from app.crud import CRUDItems
+from pydantic_mongo import PydanticObjectId
 from typing import List, Optional
 import os
 
@@ -23,7 +24,7 @@ async def create_item(item: Item, api_key: str = Depends(verify_api_key)):
     return {"inserted_id": inserted_id}
 
 @router.get("/id/{item_id}", response_model=ItemResponse, summary="Get Item by ID", description="Retrieve an item by its ID.")
-async def get_item(item_id: str, api_key: str = Depends(verify_api_key)):
+async def get_item(item_id: PydanticObjectId, api_key: str = Depends(verify_api_key)):
     item = items.get_by_id(item_id)
     print(item)
     if not item:
@@ -41,7 +42,7 @@ async def filter_items(email: Optional[str] = None,
     return result
 
 @router.put("/id/{item_id}", response_model=ItemResponse, summary="Update Item", description="Update an existing item by its ID and return the updated item.")
-async def update_item(item_id: str, updated_item: ItemUpdate, api_key: str = Depends(verify_api_key)):
+async def update_item(item_id: PydanticObjectId, updated_item: ItemUpdate, api_key: str = Depends(verify_api_key)):
     print(updated_item)
     item_data = updated_item.model_dump(exclude_none=True)
     item = items.update(item_id, item_data)
@@ -50,7 +51,7 @@ async def update_item(item_id: str, updated_item: ItemUpdate, api_key: str = Dep
     return item
 
 @router.delete("/id/{item_id}", response_model=dict, summary="Delete Item", description="Delete an item by its ID.")
-async def delete_item(item_id: str, api_key: str = Depends(verify_api_key)):
+async def delete_item(item_id: PydanticObjectId, api_key: str = Depends(verify_api_key)):
     deleted = items.delete(item_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Item not found")
