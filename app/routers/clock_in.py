@@ -16,7 +16,7 @@ def verify_api_key(api_key: str = Header(...)):
 router = APIRouter(tags=["ClockIn"], prefix='/clockin')
 clock_in_manager = CRUDClockIn()
 
-@router.post("/", response_model=dict, summary="Create a Clock-In Entry", description="Create a new clock-in entry and return the created entry.")
+@router.post("/", response_model=dict, summary="Create a Clock-In Entry", description="Create a new clock-in entry and return the inserted id.")
 async def create_clock_in(clock_in: ClockIn, api_key: str = Depends(verify_api_key)):
     clock_in_data = clock_in.model_dump()
     inserted_id = clock_in_manager.create(clock_in_data)
@@ -29,7 +29,13 @@ async def get_clock_in(clock_in_id: PydanticObjectId, api_key: str = Depends(ver
         raise HTTPException(status_code=404, detail="Clock-in entry not found")
     return clock_in
 
-@router.get("/", response_model=List[ClockInResponse], summary="Filter Clock-In Entries", description="Filter clock-in entries based on optional query parameters such as email, location, and insert date.")
+@router.get("/", response_model=List[ClockInResponse], summary="Filter Clock-In Entries", description=(
+                "Filter items based on query parameters such as "
+                "email, insert date, and quantity. \n"
+                "\n The insert date should be in either of the following formats: \n"
+                "1. 'YYYY-MM-DD HH:MM:SS' \n"
+                "2. 'YYYY-MM-DD'"
+            ))
 async def filter_clock_ins(email: Optional[str] = None, 
                             location: Optional[str] = None,
                             insert_datetime: Optional[str] = None,

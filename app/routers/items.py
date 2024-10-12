@@ -17,7 +17,7 @@ def verify_api_key(api_key: str = Header(...)):
 router = APIRouter(tags=["Items"], prefix="/items")
 items = CRUDItems()
 
-@router.post("/", response_model=dict, summary="Create an Item", description="Create a new item and return the created item.")
+@router.post("/", response_model=dict, summary="Create an Item", description="Create a new item and return inserted id.")
 async def create_item(item: Item, api_key: str = Depends(verify_api_key)):
     item_data = item.model_dump()
     inserted_id = items.create(item_data)
@@ -31,7 +31,13 @@ async def get_item(item_id: PydanticObjectId, api_key: str = Depends(verify_api_
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@router.get("/", response_model=List[ItemResponse], summary="Filter Items", description="Filter items based on any one optional query parameters such as email, expiry date, insert date, and quantity.")
+@router.get("/", response_model=List[ItemResponse], summary="Filter Items", description=(
+                "Filter items based on query parameters such as "
+                "email, expiry date, insert date, and quantity. \n"
+                "\nThe expiry date and insert date should be in either of the following formats: \n"
+                "1. 'YYYY-MM-DD HH:MM:SS' \n"
+                "2. 'YYYY-MM-DD'"
+            ))
 async def filter_items(email: Optional[str] = None, 
                        expiry_date: Optional[str] = None,
                        insert_date: Optional[str] = None, 
