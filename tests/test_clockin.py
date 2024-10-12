@@ -9,7 +9,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.main import app
 
-API_KEY = os.environ.get("API_KEY", "123")
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="app.env")
+API_KEY = os.environ.get("API_KEY")
 
 @pytest.fixture(scope="module")
 def client():

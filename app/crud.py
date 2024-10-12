@@ -6,8 +6,11 @@ from typing import List, Optional
 from datetime import datetime
 import os
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
-DATABASE_NAME = os.environ.get("DATABASE_NAME", "trackit")
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="app.env")
+
+MONGO_URI = os.environ.get("MONGO_URI")
+DATABASE_NAME = os.environ.get("DATABASE_NAME")
 
 def string_to_date(date_str: str) -> datetime:
     formats = [

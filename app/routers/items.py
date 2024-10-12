@@ -4,8 +4,9 @@ from app.crud import CRUDItems
 from typing import List, Optional
 import os
 
-API_KEY = os.environ.get("API_KEY", "123") 
-API_KEY= "123" 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="app.env")
+API_KEY = os.environ.get("API_KEY", "mjx.D@Gv)2fi") 
 
 def verify_api_key(api_key: str = Header(...)):
     if api_key != API_KEY:
