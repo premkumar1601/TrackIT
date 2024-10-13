@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from pymongo import MongoClient
 from bson import ObjectId
-from app.models import Item, ClockIn
+from app.models import Item, ClockIn, ItemResponse, ClockInResponse
 from typing import List, Optional
 from datetime import datetime
 import os
@@ -84,14 +84,14 @@ class CRUDItems(CRUDBase):
         super().__init__("items")
 
     def filter_items(self, email: Optional[str] = None, expiry_date: Optional[str] = None,
-                     insert_date: Optional[str] = None, quantity: Optional[int] = None) -> List[Item]:
+                     insert_date: Optional[str] = None, quantity: Optional[int] = None) -> List[ItemResponse]:
         query = {}
         if email:
             query["email"] = email
         if expiry_date:
-            query["expiry_date"] = {"$gt": string_to_date(expiry_date)}
+            query["expiry_date"] = {"$gte": string_to_date(expiry_date)}
         if insert_date:
-            query["insert_date"] = {"$gt": string_to_date(insert_date)}
+            query["insert_date"] = {"$gte": string_to_date(insert_date)}
         if quantity is not None:
             query["quantity"] = {"$gte": quantity}
 
@@ -111,14 +111,14 @@ class CRUDClockIn(CRUDBase):
         super().__init__("clock_in")
 
     def filter_clock_ins(self, email: Optional[str] = None, location: Optional[str] = None,
-                          insert_datetime: Optional[str] = None) -> List[ClockIn]:
+                          insert_datetime: Optional[str] = None) -> List[ClockInResponse]:
         query = {}
         if email:
             query["email"] = email
         if location:
             query["location"] = location
         if insert_datetime:
-            query["insert_datetime"] = {"$gt": insert_datetime}
+            query["insert_date"] = {"$gte": string_to_date(insert_datetime)}
 
         if query:
             clockin_records = self.find(query)
